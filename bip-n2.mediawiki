@@ -1,0 +1,54 @@
+<pre>
+  BIP: n2
+  Title: Transaction Expiration
+  Authors: Eric Lombrozo <elombrozo@gmail.com> and andytoshi
+  Status: Draft
+  Type: Standards Track
+  Created: 12-30-2013
+</pre>
+
+==Abstract==
+
+This BIP describes a protocol change allowing transactions to expire after a certain amount of time.
+
+==Motivation==
+
+Bitcoin transactions have an unsigned 32-bit field called lock_time, ensuring the transaction cannot be confirmed before either a particular block height or a particular UNIX timestamp. However, there's currently no simple way to do the reverse: ensure a transaction is voided if it fails to confirm in a given amount of time.
+
+As long as most transactions are entirely constructed by single users, the main concern with the lack of a simple way to ensure transactions expire is the fact a transaction might remain unconfirmed for an unpredictable length of time. This means any of the outputs this transaction is claiming are temporarily tied up. The only way to speed up the process of "untying them" and force finality is to make a deliberate double-spend.
+
+Once people begin to participate more in m-of-n transactions and other joint transaction forms, other serious issues also emerge. In particular, it becomes necessary to construct a signature request protocol (which will be the topic of another BIP in the near future). Parties need to be able to exchange signatures in a timely fashion. If, for whatever reason, any of the would-be signatories bails, the parties who have signed could be left in an uncomfortable situation - namely, one or more of the participants who bailed, either individually or as a group, could complete the signatures and broadcast the transaction. As in the previous example, the only way to force finality would be to deliberately double-spend at least one of the claimed outputs. While in theory such solutions are possible, this appears to be a highly undesirable complication.
+
+==Specification==
+
+The lock_time field is a 32-bit unsigned integer.
+
+Currently,
+    case lock_time < 500,000,000:
+        lock_time is treated as a block height.
+        Only blocks with this height or greater are allowed to include this transaction.
+
+    case lock_time >= 500,000,000:
+        lock_time is treated as UNIX timestamps.
+        Only blocks with this timestamp or greater are allowed to include this transaction.
+
+The following interpretation of the lock_time field is to be used instead:
+    case lock_time < 250,000,000:
+        lock_time is treated as a block height.
+        Only blocks with this height or greater are allowed to include this transaction.
+
+    case 250,000,000 <= lock_time < 500,000,000:
+        lock_time - 250,000,000 is treated as a block height.
+        Blocks with height greater than this are not allowed to include this transaction.
+
+    case lock_time >= 500,000,000:
+        lock_time is treated as UNIX timestamps.
+        Only blocks with this timestamp or greater are allowed to include this transaction.
+
+==Rationale==
+
+We note that 500,000,000 blocks at an average rate of six per hour translates to approximately 9506 years. We will run out of 32-bit UNIX timestamps in 2106, thousands of years before block height overflow even remotely becomes an issue. The advantages to protocol simplicity (in particular for applications like m-of-n signature requests and CoinJoin) seem sufficiently compelling - and the potential downsides sufficiently negligible - to make it worth adopting this BIP.
+
+==Reverse Compatibility==
+
+Practically speaking, this change shouldn't cause any issues with existing transactions. The first and third cases above are identical to the current interpretation. Any transactions satisfying the second case are unlikely to make it into the blockchain anytime within the next 4000 years, making the lock_time moot.

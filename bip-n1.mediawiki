@@ -1,0 +1,48 @@
+<pre>
+  BIP: n1
+  Title: Partially Signed Transactions
+  Author: Eric Lombrozo <elombrozo@gmail.com>
+  Status: Draft
+  Type: Standards Track
+  Created: 12-30-2013
+</pre>
+
+==Abstract==
+
+This BIP describes a binary format for a partially signed transaction. 
+
+==Motivation==
+
+In order for multiple users to make use of m-of-n signature policies as well as to allow multiple users to join in a single transaction (i.e. CoinJoin), it is necessary to pass around unsigned transaction templates and individual signatures which ultimately result in a fully signed transaction that can be broadcast to the Bitcoin network.
+
+In order to simplify pattern matching to the greatest extent possible, we would like partially signed transactions to preserve as much of their structure as possible. In particular, we should leave easily recognized placeholders to be filled in as needed.
+
+==Specification==
+
+Input scripts push zero-length objects onto the stack as placeholders for any missing signatures. In the case of multisignature scripts, a zero-length object will be pushed as a signature placeholder for each respective public key in the redeemscript in the same order as it appears in the redeemscript. Once the minimum number of required signatures have been added, the remaining zero-length signature placeholders will be removed.
+
+Hashes for partially signed transactions must first replace all signatures with zero-length objects, the state of a fully unsigned transaction, so that all versions of the partially signed transaction will produce the same hash value.
+
+==Examples==
+
+Pay-to-pubkey-hash transaction:
+    scriptSig: OP_0 [pubkey]
+
+Pay-to-script-hash 2-of-3 transaction signed only by second party:
+    scriptSig: OP_0 OP_0 <sig2> OP_0 {2 [pubkey1] [pubkey2] [pubkey3] 3 OP_CHECKMULTISIG}
+
+==Rationale==
+
+Some might note that in the case of standard pay-to-pubkey-hash transactions, the person spending the output almost surely also generated the pubkey hash as well - and so the scheme noted above might seem excessive. Indeed, just blanking the entire input script would be possible.
+
+An objection to this argument is that blanking entire input scripts lacks sufficient generality. In particular, such an approach would fail for pay-to-script-hash inputs, since there is no way in general for someone holding one of the public keys to know the script hash involves them in any way. In the general use case, signers didn't necessarily originate the transaction.
+
+Furthermore, it is important that anyone signing the transaction be able to see the full redeemscript, since pay-to-script-hash transactions in principle could support any valid script type.
+
+Even for the pay-to-pubkey-hash case, other parties to the transaction might wish to verify that the person who added the input does indeed know how to redeem the output, which potentially helps against spam.
+
+Perhaps the most compelling reason of all for this approach is the simplicity in the logic for parsing and processing transactions. Zero-length signatures are simply treated as "pending." By making the correspondence between public keys and their respective signatures clear just from structure, it will greatly simplify the logic for multisignature wallet applications and reduce computation time required in validating the partial signatures at a minimal cost of an extra byte per missing signature.
+
+==Reference Implementation==
+
+This specific proposal has been implemented here: https://github.com/CodeShark/CoinClasses/tree/master/examples/txbuilder
