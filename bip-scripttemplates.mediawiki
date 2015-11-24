@@ -33,15 +33,15 @@ An individual key is determined by a BIP32 derivation path and an index. For con
 
 Let '''m'''<sub>i</sub> denote distinct BIP32 derivation paths. We define a key group of n keys as a set of key derivation paths with a free index k:
 
-'''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k, ..., '''m'''<sub>n</sub>/k }
+{'''K'''<sub>k</sub>} = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k, ..., '''m'''<sub>n</sub>/k }
 
 Key groups are useful abstractions for constructing scripts that are symmetric in the keys; in other words, if the authorization policy of a script is unaffected by permutations of the keys in the key group.
 
 ===Sorting===
 
-We define a lexicographic sorting of the keys, Sort('''K'''<sub>k</sub>), an ordered list.
+We define a lexicographic sorting of the keys. (TODO: specification of sorting conventions - compressed pubkeys, encoding, etc...)
 
-Define Sort<sub>j</sub>('''K'''<sub>k</sub>) to be the jth element of the sorted keys for derivation index k.
+Define {'''K'''<sub>k</sub>}<sub>j</sub> to be the jth element of the sorted keys for derivation index k.
 
 ===Script Templates===
 
@@ -51,7 +51,7 @@ We construct script templates by inserting placeholders for keys into a script. 
 
 We introduce the following convenient notation for sorted key groups:
 
-[{'''K'''<sub>k</sub>}] = [Sort<sub>1</sub>('''K'''<sub>k</sub>)] [Sort<sub>2</sub>('''K'''<sub>k</sub>)] ... [Sort<sub>n</sub>('''K'''<sub>k</sub>)]
+[{'''K'''<sub>k</sub>}] = [{'''K'''<sub>k</sub>}<sub>1</sub>] [{'''K'''<sub>k</sub>}<sub>2</sub>] ... [{'''K'''<sub>k</sub>}<sub>n</sub>]
 
 ===Operations on Keys===
 
@@ -73,7 +73,7 @@ TODO
 
 ===1-of-1 or 2-of-3===
 
-Let '''M'''<sub>k</sub> = m/k be a BIP32 derivation path for a superuser that can authorize all transactions and '''K''' be a key group for three users that can only authorize transactions if at least two of them agree.
+Let '''M'''<sub>k</sub> = '''m'''/k be a key of a superuser that can authorize all transactions and {'''K'''<sub>k</sub>} be a key group for three users that can only authorize transactions if at least two of them agree.
 
 OP_DUP ['''M'''<sub>k</sub>] OP_CHECKSIG<br>
 OP_NOTIF<br>
