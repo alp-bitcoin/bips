@@ -83,10 +83,12 @@ OP_TRUE
 
 ===Timelocked Contract===
 
+The output is payable to Alice immediately if she knows the private key for '''A'''<sub>k</sub>. Bob must know the private key for '''B'''<sub>k</sub> and also wait for a timeout before being able to claim the output.
+
 OP_IF <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''A'''<sub>k</sub>)] OP_EQUALVERIFY OP_CHECKSIG <br>
 OP_ELSE <br>
-&nbsp; &nbsp; &nbsp; &nbsp; <TIMEOUT> OP_CHECKLOCKTIMEVERIFY OP_DROP <br>
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;TIMEOUT&gt; OP_CHECKLOCKTIMEVERIFY OP_DROP <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''B'''<sub>k</sub>)] OP_EQUALVERIFY OP_CHECKSIG <br>
 OP_ENDIF
 
