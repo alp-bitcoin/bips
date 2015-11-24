@@ -13,17 +13,27 @@ This BIP defines a script template format that can be used by wallets to determi
 
 ==Motivation==
 
-Currently existing wallets typically issue scripts in only a tiny handful of widely used formats. The most popular formats are pay-to-pubkey-hash and m-of-n pay-to-script-hash (BIP16). However, different wallets tend to use mutually incompatible derivation schemes to generate signing keys and construct scripts from them. Moreover, with the advent of hashlocked and timelocked contracts (BIP65, BIP112), it is necessary for different wallets to be able to cooperatively generate even more sophisticated scripts. In addition, there's a lot of ongoing work in the development of multilayered protocols that use the blockchain as a settlement layer (i.e. the Lightning Network).
+Currently existing wallets typically issue scripts in only a tiny handful of widely used formats. The most popular formats are pay-to-pubkey-hash and m-of-n pay-to-script-hash (BIP16). However, different wallets tend to use mutually incompatible derivation schemes to generate signing keys and construct scripts from them. Moreover, with the advent of hashlocked and timelocked contracts (BIP65, BIP112), it is necessary for different wallets to be able to cooperatively generate even more sophisticated scripts.
+
+In addition, there's a lot of ongoing work in the development of multilayered protocols that use the blockchain as a settlement layer (i.e. the Lightning Network). These efforts require sufficiently generalized templates to allow for rapidly evolving script designs.
 
 This BIP provides a generalized format for constructing a script template that guarantees that different wallets will all produce the same scripts for a given set of derivation paths according to BIP32.
 
 ==Specification==
 
+===Keys===
+
+An individual key is determined by a BIP32 derivation path and an index. For convenience, we introduce the following notation:
+
+'''A'''<sub>k</sub> = (derivation path for A)/k
+
 ===Key Groups===
 
-Let '''m'''<sub>i</sub> denote distinct BIP32 derivation paths. We define a key group as a set of key derivation paths with a free index k:
+Let '''m'''<sub>i</sub> denote distinct BIP32 derivation paths. We define a key group of n keys as a set of key derivation paths with a free index k:
 
-'''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k, ... }
+'''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k, ..., '''m'''<sub>n</sub>/k }
+
+Key groups are useful abstractions for constructing scripts that are symmetric in the keys; in other words, if the authorization policy of a script is unaffected by permutations of the keys in the key group.
 
 ===Sorting===
 
@@ -35,7 +45,17 @@ Define Sort<sub>j</sub>('''K'''<sub>k</sub>) to be the jth element of the sorted
 
 We construct script templates by inserting placeholders for keys into a script. To denote a placeholder for a key, we use the following notation:
 
-'''SCRIPT'''<sub>k</sub> = opcodes ... ['''KEY'''<sub>k</sub>] ... opcodes
+'''SCRIPT'''<sub>k</sub> = opcodes ... ['''A'''<sub>k</sub>] ... opcodes
+
+We introduce the following convenient notation for sorted key groups:
+
+[{'''K'''<sub>k</sub>}] = [Sort<sub>1</sub>('''K'''<sub>k</sub>)] [Sort<sub>2</sub>('''K'''<sub>k</sub>)] ... [Sort<sub>n</sub>('''K'''<sub>k</sub>)]
+
+===Operations on Keys===
+
+In some applications, we might want to insert the result of some operation performed on a key rather than the key itself into the script. For example, we might want to insert a Hash160 of key '''A'''<sub>k</sub>. We can use the following notation:
+
+[''Hash160''('''A'''<sub>k</sub>)]
 
 ===Encoding===
 
@@ -45,21 +65,28 @@ TODO
 
 ===2-of-3 Multisig===
 
-2 [Sort<sub>1</sub>('''K'''<sub>k</sub>)] [Sort<sub>2</sub>('''K'''<sub>k</sub>)] [Sort<sub>3</sub>('''K'''<sub>k</sub>)] 3 OP_CHECKMULTISIG
+'''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k }
+
+2 [{'''K'''<sub>k</sub>}] 3 OP_CHECKMULTISIG
 
 ===1-of-1 or 2-of-3===
 
-Let '''M''' be a BIP32 derivation path for a superuser that can authorize all transactions and '''K''' be a key group for three users that can only authorize transactions if at least two of them agree.
+Let '''M'''<sub>k</sub> = m/k be a BIP32 derivation path for a superuser that can authorize all transactions and '''K''' be a key group for three users that can only authorize transactions if at least two of them agree.
 
-OP_DUP ['''M'''/k] OP_CHECKSIG<br>
+OP_DUP ['''M'''<sub>k</sub>] OP_CHECKSIG<br>
 OP_NOTIF<br>
-&nbsp; &nbsp; &nbsp; &nbsp; 2 [Sort<sub>1</sub>('''K'''<sub>k</sub>)] [Sort<sub>2</sub>('''K'''<sub>k</sub>)] [Sort<sub>3</sub>('''K'''<sub>k</sub>)] 3 OP_CHECKMULTISIGVERIFY <br>
+&nbsp; &nbsp; &nbsp; &nbsp; 2 [{'''K'''<sub>k</sub>}] 3 OP_CHECKMULTISIGVERIFY <br>
 OP_ENDIF<br>
 OP_TRUE
 
-===Hashlocked Contract===
+===Timelocked Contract===
 
-TODO
+OP_IF <br>
+&nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''A'''<sub>k</sub>)] OP_EQUALVERIFY OP_CHECKSIG <br>
+OP_ELSE <br>
+&nbsp; &nbsp; &nbsp; &nbsp; <TIMEOUT> OP_CHECKLOCKTIMEVERIFY OP_DROP <br>
+&nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''B'''<sub>k</sub>)] OP_EQUALVERIFY OP_CHECKSIG <br>
+OP_ENDIF
 
 ==Reference==
 
