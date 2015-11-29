@@ -47,11 +47,11 @@ Define {'''K'''<sub>k</sub>}<sub>j</sub> to be the jth element of the sorted key
 
 We construct script templates by inserting placeholders for data into a script. To denote a placeholder, we use the following notation:
 
-''SCRIPT''('''A''') = opcodes ['''A'''] opcodes
+''Script''('''A''') = opcodes ['''A'''] opcodes
 
 We extend this notation to an arbitrary number of placeholders:
 
-''SCRIPT''('''X1''', '''X2''', ..., '''Xn''') = opcodes ['''X1'''] opcodes ['''X2'''] opcodes ... opcodes ['''Xn'''] opcodes
+''Script''('''X1''', '''X2''', ..., '''Xn''') = opcodes ['''X1'''] opcodes ['''X2'''] opcodes ... opcodes ['''Xn'''] opcodes
 
 We introduce the following convenient notation for sorted key groups:
 
@@ -73,15 +73,15 @@ TODO
 
 The script template is defined by:
 
-''SCRIPT''('''X''') = 2 ['''X'''] 3 OP_CHECKMULTISIG
+''Script''('''X''') = 2 ['''X'''] 3 OP_CHECKMULTISIG
 
-Letting '''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k }, the ''k''th script for this key group is denoted by ''SCRIPT''({'''K'''<sub>k</sub>}).
+Letting '''K'''<sub>k</sub> = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k }, the ''k''th script for this key group is denoted by ''Script''({'''K'''<sub>k</sub>}).
 
 ===1-of-1 or 2-of-3===
 
 The script template is defined by:
 
-''SCRIPT''('''A''', '''B''') = <br>
+''Script''('''A''', '''B''') = <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_DUP ['''A'''] OP_CHECKSIG<br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_NOTIF<br>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; 2 ['''B'''] 3 OP_CHECKMULTISIGVERIFY <br>
@@ -91,7 +91,7 @@ The script template is defined by:
 
 Let '''M'''<sub>k</sub> = '''m'''/k be a key of a superuser that can authorize all transactions and {'''K'''<sub>k</sub>} be a key group of three users that can only authorize transactions if at least two of them agree.
 
-The ''k''th script is given by ''SCRIPT''('''M'''<sub>k</sub>, {'''K'''<sub>k</sub>}).
+The ''k''th script is given by ''Script''('''M'''<sub>k</sub>, {'''K'''<sub>k</sub>}).
 
 ===Timelocked Contract===
 
@@ -99,7 +99,7 @@ The output is payable to Alice immediately if she knows the private key for '''A
 
 The script template is defined by:
 
-''SCRIPT''('''A''', '''B''', '''T''') = <br>
+''Script''('''A''', '''B''', '''T''') = <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_IF <br>
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''A''')] OP_EQUALVERIFY OP_CHECKSIG <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_ELSE <br>
@@ -107,7 +107,7 @@ The script template is defined by:
 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; OP_DUP OP_HASH160 [''Hash160''('''B''')] OP_EQUALVERIFY OP_CHECKSIG <br>
 &nbsp; &nbsp; &nbsp; &nbsp; OP_ENDIF
 
-The ''k''th script with timeout '''t''' is given by ''SCRIPT''('''A'''<sub>k</sub>, '''B'''<sub>k</sub>, '''t''').
+The ''k''th script with timeout '''t''' is given by ''Script''('''A'''<sub>k</sub>, '''B'''<sub>k</sub>, '''t''').
 
 ==Reference==
 
