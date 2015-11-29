@@ -35,7 +35,7 @@ Let '''m'''<sub>i</sub> denote distinct BIP32 derivation paths. We define a key 
 
 {'''K'''<sub>k</sub>} = { '''m'''<sub>1</sub>/k, '''m'''<sub>2</sub>/k, '''m'''<sub>3</sub>/k, ..., '''m'''<sub>n</sub>/k }
 
-Key groups are useful abstractions for constructing scripts that are symmetric in the keys; in other words, if the authorization policy of a script is unaffected by permutations of the keys in the key group.
+Key groups are useful for constructing scripts that are symmetric in a set of keys. Scripts are symmetric in a set of keys if the semantics of the script is unaffected by permutations of the keys. Key groups enforce a canonical form and can improve privacy.
 
 ===Sorting===
 
